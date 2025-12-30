@@ -2,6 +2,7 @@ import React from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Order } from '../../types';
 import { Eye, X } from 'lucide-react';
+import Invoice from '../../components/Invoice';
 
 const OrderListPage: React.FC = () => {
     const { orders, updateOrderStatus } = useStore();
@@ -101,127 +102,55 @@ const OrderListPage: React.FC = () => {
 
             {/* Order Details Modal */}
             {selectedOrder && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}>
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in-up" onClick={e => e.stopPropagation()}>
-                        <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm print:p-0" onClick={() => setSelectedOrder(null)}>
+                    <div
+                        className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-fade-in-up print:fixed print:inset-0 print:max-h-full print:rounded-none print:shadow-none"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="sticky top-0 z-10 bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center print:hidden">
                             <div>
-                                <h3 className="font-serif text-xl text-slate-800">Order Details</h3>
-                                <p className="text-sm text-slate-500 font-mono">#{selectedOrder.id}</p>
+                                <h3 className="font-serif text-xl text-slate-800">Order Management</h3>
+                                <p className="text-sm text-slate-500">Status Update & Invoice</p>
                             </div>
-                            <button onClick={() => setSelectedOrder(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                                <X size={24} />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-900 transition-colors flex items-center gap-2"
+                                    onClick={() => window.print()}
+                                >
+                                    <span className="hidden sm:inline">Print Invoice</span>
+                                </button>
+                                <button onClick={() => setSelectedOrder(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="p-6 max-h-[80vh] overflow-y-auto">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                {/* Customer Info */}
-                                <div>
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Customer</h4>
-                                    <div className="space-y-1">
-                                        <p className="font-medium text-slate-900">{selectedOrder.customerName}</p>
-                                        <p className="text-sm text-slate-600">{selectedOrder.customerPhone}</p>
-                                        <p className="text-sm text-slate-600 mt-2">{selectedOrder.customerAddress}</p>
-                                        <p className="text-xs text-slate-500 bg-slate-100 inline-block px-2 py-1 rounded mt-1">{selectedOrder.city}</p>
-                                    </div>
-                                </div>
-
-                                {/* Payment Info */}
-                                <div>
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Payment Info</h4>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span className="text-sm text-slate-600">Method:</span>
-                                            <span className="text-sm font-medium text-slate-900">{selectedOrder.paymentMethod}</span>
-                                        </div>
-                                        {selectedOrder.paymentPlatform && (
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-slate-600">Platform:</span>
-                                                <span className="text-sm font-medium text-slate-900">{selectedOrder.paymentPlatform}</span>
-                                            </div>
-                                        )}
-                                        {selectedOrder.trxId && (
-                                            <div className="bg-slate-50 p-3 rounded border border-slate-200">
-                                                <span className="text-xs text-slate-500 block mb-1">Transaction ID</span>
-                                                <code className="text-sm font-mono text-primary">{selectedOrder.trxId}</code>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between items-center pt-2">
-                                            <span className="text-sm text-slate-600">Status:</span>
-                                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${selectedOrder.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                selectedOrder.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                                                    selectedOrder.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                                                        'bg-blue-100 text-blue-800'
-                                                }`}>{selectedOrder.status}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Order Items */}
-                            <div>
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Order Items</h4>
-                                <div className="border rounded-lg overflow-hidden mb-6">
-                                    <table className="w-full text-sm">
-                                        <thead className="bg-slate-50">
-                                            <tr>
-                                                <th className="px-4 py-2 text-left font-medium text-slate-600">Product</th>
-                                                <th className="px-4 py-2 text-right font-medium text-slate-600">Qty</th>
-                                                <th className="px-4 py-2 text-right font-medium text-slate-600">Price</th>
-                                                <th className="px-4 py-2 text-right font-medium text-slate-600">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            {selectedOrder.items.map((item, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="px-4 py-3">
-                                                        <div className="font-medium text-slate-900">{item.name}</div>
-                                                        <div className="text-xs text-slate-500">
-                                                            {item.category}
-                                                            {item.selectedColor && <span className="ml-1 border-l border-slate-300 pl-1">Color: {item.selectedColor}</span>}
-                                                            {item.selectedSize && <span className="ml-1 border-l border-slate-300 pl-1">Size: {item.selectedSize}</span>}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right text-slate-600">x{item.quantity}</td>
-                                                    <td className="px-4 py-3 text-right text-slate-600">৳{item.price}</td>
-                                                    <td className="px-4 py-3 text-right font-medium text-slate-900">৳{item.price * item.quantity}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                        <tfoot className="bg-slate-50">
-                                            <tr>
-                                                <td colSpan={3} className="px-4 py-2 text-right text-slate-600">Subtotal</td>
-                                                <td className="px-4 py-2 text-right font-medium text-slate-900">৳{selectedOrder.totalAmount - selectedOrder.deliveryFee}</td>
-                                            </tr>
-                                            <tr>
-                                                <td colSpan={3} className="px-4 py-2 text-right text-slate-600">Delivery Fee</td>
-                                                <td className="px-4 py-2 text-right font-medium text-slate-900">৳{selectedOrder.deliveryFee}</td>
-                                            </tr>
-                                            <tr className="border-t border-slate-200">
-                                                <td colSpan={3} className="px-4 py-3 text-right font-bold text-slate-800">Grand Total</td>
-                                                <td className="px-4 py-3 text-right font-bold text-primary text-lg">৳{selectedOrder.totalAmount}</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-3">
-                                <button
-                                    onClick={() => setSelectedOrder(null)}
-                                    className="px-4 py-2 border border-slate-300 rounded text-slate-600 hover:bg-slate-50 transition-colors"
+                        <div className="p-6">
+                            {/* Status Control */}
+                            <div className="mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200 print:hidden">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Update Order Status</label>
+                                <select
+                                    value={selectedOrder.status}
+                                    onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value as Order['status'])}
+                                    className="w-full px-4 py-2 rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
                                 >
-                                    Close
-                                </button>
-                                <button
-                                    className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-900 transition-colors"
-                                    onClick={() => {
-                                        window.print();
-                                    }}
-                                >
-                                    Print Invoice
-                                </button>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                    <option disabled>──────────</option>
+                                    <option value="Return Processing">Return Processing</option>
+                                    <option value="Returned">Returned</option>
+                                    <option value="Refund Processing">Refund Processing</option>
+                                    <option value="Refunded">Refunded</option>
+                                    <option value="Exchange Processing">Exchange Processing</option>
+                                    <option value="Exchanged">Exchanged</option>
+                                </select>
                             </div>
+
+                            {/* The Invoice Component */}
+                            <Invoice order={selectedOrder} />
                         </div>
                     </div>
                 </div>
