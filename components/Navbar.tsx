@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Menu, X, Sparkles, Search } from 'lucide-react';
 import { CartItem } from '../types';
+import { useStore } from '../context/StoreContext';
 
 interface NavbarProps {
-  cart: CartItem[];
   onOpenCart: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ cart, onOpenCart }) => {
+const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
+  const { cart } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -156,22 +157,33 @@ const Navbar: React.FC<NavbarProps> = ({ cart, onOpenCart }) => {
             <Link to="/custom-order" onClick={toggleMenu} className="block px-3 py-2 text-lg font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-600 rounded-md transition-colors">Custom Order</Link>
             <div className="border-t border-pink-100 my-3"></div>
             <div className="grid grid-cols-2 gap-2">
-              {['Home Decor', 'Stationery', 'Ornaments', 'Makeup'].map((cat, idx) => (
-                <Link
-                  key={cat}
-                  to={`/shop?category=${cat}`}
-                  onClick={toggleMenu}
-                  className="block px-3 py-2 text-sm text-slate-500 hover:text-primary hover:bg-pink-50 rounded-md transition-colors"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  {cat}
-                </Link>
-              ))}
+              {/* Note: In a real app we might want to fetch categories from store, but for mobile menu logic, we need to access store */}
+              <MobileMenuCategories toggleMenu={toggleMenu} />
             </div>
           </div>
         </div>
       )}
     </nav>
+  );
+};
+
+// Helper component to access store
+const MobileMenuCategories: React.FC<{ toggleMenu: () => void }> = ({ toggleMenu }) => {
+  const { categories } = useStore();
+  return (
+    <>
+      {categories.map((cat, idx) => (
+        <Link
+          key={cat}
+          to={`/shop?category=${cat}`}
+          onClick={toggleMenu}
+          className="block px-3 py-2 text-sm text-slate-500 hover:text-primary hover:bg-pink-50 rounded-md transition-colors"
+          style={{ animationDelay: `${idx * 50}ms` }}
+        >
+          {cat}
+        </Link>
+      ))}
+    </>
   );
 };
 

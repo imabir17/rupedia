@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
-import { Product, Category } from '../types';
+import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 
 interface HomePageProps {
@@ -9,7 +9,10 @@ interface HomePageProps {
   onAddToCart: (product: Product) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ products, onAddToCart }) => {
+import { useStore } from '../context/StoreContext';
+
+const HomePage: React.FC = () => {
+  const { products, categories } = useStore();
   const featuredProducts = products.filter(p => p.isFeatured).slice(0, 4);
 
   return (
@@ -55,7 +58,7 @@ const HomePage: React.FC<HomePageProps> = ({ products, onAddToCart }) => {
           <div className="h-1 w-20 bg-accent mx-auto rounded-full" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.values(Category).map((cat, idx) => (
+          {categories.map((cat, idx) => (
             <Link
               key={cat}
               to={`/shop?category=${cat}`}
@@ -91,7 +94,7 @@ const HomePage: React.FC<HomePageProps> = ({ products, onAddToCart }) => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredProducts.map(product => (
-              <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
           <div className="mt-8 text-center sm:hidden">

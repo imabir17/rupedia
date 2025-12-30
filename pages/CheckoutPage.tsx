@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { CartItem } from '../types';
+import { CartItem, Order } from '../types';
 import { MapPin, CreditCard, Send, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '../context/StoreContext';
 
-interface CheckoutPageProps {
-    cart: CartItem[];
-    onPlaceOrder?: () => void;
-}
-
-const CheckoutPage: React.FC<CheckoutPageProps> = ({ cart }) => {
+const CheckoutPage: React.FC = () => {
     const navigate = useNavigate();
+    const { cart, placeOrder } = useStore();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -31,13 +28,30 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cart }) => {
 
     const handlePlaceOrder = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (formData.paymentMethod !== 'COD' && !formData.trxId) {
             alert('Please provide the Transaction ID for online payment.');
             return;
         }
-        // Simulate order placement
-        alert(`Order Placed Successfully! \nTotal: ${total} BDT \nPayment: ${formData.paymentMethod} (${formData.paymentPlatform})`);
-        navigate('/');
+
+        // Place order in Global Store
+        placeOrder({
+            customerName: formData.name,
+            customerPhone: formData.phone,
+            customerAddress: formData.address,
+            city: formData.city,
+            items: cart,
+            totalAmount: total,
+            deliveryFee: deliveryFee,
+            paymentMethod: formData.paymentMethod as Order['paymentMethod'],
+            paymentPlatform: formData.paymentMethod === 'Online Payment' ? (formData.paymentPlatform as Order['paymentPlatform']) : undefined,
+            trxId: formData.trxId || undefined,
+        });
+
+        alert(`Order Placed Successfully! \nTotal: ${total} BDT`);
+        navigate('/'); // Redirect to Home
+        // Ideally we should clear the cart here too, but for now we focus on Admin integration
+        window.location.reload(); // Simple hack to clear cart/state for demo
     };
 
     if (cart.length === 0) {
@@ -218,14 +232,18 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cart }) => {
 
                         <div className="space-y-4 mb-6 max-h-80 overflow-y-auto custom-scrollbar">
                             {cart.map((item) => (
-                                <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+                                <div key={item.cartItemId} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
                                     <div className="flex items-center">
                                         <div className="w-12 h-12 bg-slate-100 rounded-md overflow-hidden mr-3">
                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                         </div>
                                         <div>
                                             <h4 className="text-sm font-medium text-slate-800 line-clamp-1">{item.name}</h4>
-                                            <p className="text-xs text-slate-500">Qty: {item.quantity}</p>
+                                            <p className="text-xs text-slate-500">
+                                                Qty: {item.quantity}
+                                                {item.selectedColor && ` | ${item.selectedColor}`}
+                                                {item.selectedSize && ` | ${item.selectedSize}`}
+                                            </p>
                                         </div>
                                     </div>
                                     <p className="text-sm font-medium text-slate-700">{item.price * item.quantity} BDT</p>

@@ -1,15 +1,13 @@
 import React from 'react';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
 import ProductCard from '../components/ProductCard';
 import { Clock } from 'lucide-react';
 
-interface PreOrderPageProps {
-    onAddToCart: (product: Product) => void;
-}
+import { useStore } from '../context/StoreContext';
 
-const PreOrderPage: React.FC<PreOrderPageProps> = ({ onAddToCart }) => {
-    const preOrderProducts = PRODUCTS.filter(p => p.isPreOrder);
+const PreOrderPage: React.FC = () => {
+    const { products } = useStore();
+    const preOrderProducts = products.filter(p => p.isPreOrder);
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
@@ -33,7 +31,7 @@ const PreOrderPage: React.FC<PreOrderPageProps> = ({ onAddToCart }) => {
                 {preOrderProducts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {preOrderProducts.map(product => (
-                            <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+                            <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                 ) : (

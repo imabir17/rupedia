@@ -1,15 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Product, Category, SortOption } from '../types';
+import { Product, SortOption } from '../types';
 import ProductCard from '../components/ProductCard';
 import { Filter, SlidersHorizontal, X, Search } from 'lucide-react';
+import { useStore } from '../context/StoreContext';
 
-interface ShopPageProps {
-  products: Product[];
-  onAddToCart: (product: Product) => void;
-}
-
-const ShopPage: React.FC<ShopPageProps> = ({ products, onAddToCart }) => {
+const ShopPage: React.FC = () => {
+  const { products, categories } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -188,7 +185,7 @@ const ShopPage: React.FC<ShopPageProps> = ({ products, onAddToCart }) => {
                         All Categories
                       </button>
                     </li>
-                    {Object.values(Category).map(cat => (
+                    {categories.map(cat => (
                       <li key={cat}>
                         <button
                           onClick={() => handleCategoryChange(cat)}
@@ -256,7 +253,7 @@ const ShopPage: React.FC<ShopPageProps> = ({ products, onAddToCart }) => {
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
                 {filteredProducts.map(product => (
-                  <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             ) : (

@@ -1,17 +1,18 @@
 import React from 'react';
 import { X, Trash2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { CartItem } from '../types';
+import { useStore } from '../context/StoreContext';
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  cart: CartItem[];
-  onRemove: (id: string) => void;
-  onUpdateQuantity: (id: string, delta: number) => void;
 }
 
-const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, cart, onRemove, onUpdateQuantity }) => {
+const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
+  const { cart, removeFromCart, updateQuantity } = useStore();
+  // Map store actions to local names if needed or use directly
+  const onRemove = removeFromCart;
+  const onUpdateQuantity = updateQuantity;
   const navigate = useNavigate();
   const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
@@ -48,7 +49,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, cart, onRemove
               </div>
             ) : (
               cart.map((item) => (
-                <div key={item.id} className="flex space-x-4">
+                <div key={item.cartItemId} className="flex space-x-4">
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-pink-200">
                     <img
                       src={item.image}
@@ -63,12 +64,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, cart, onRemove
                         <h3>{item.name}</h3>
                         <p className="ml-4">৳{(item.price * item.quantity).toFixed(2)}</p>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">{item.category}</p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {item.category}
+                        {item.selectedColor && <span className="ml-2 text-xs border border-slate-200 px-1 rounded">Color: {item.selectedColor}</span>}
+                        {item.selectedSize && <span className="ml-2 text-xs border border-slate-200 px-1 rounded">Size: {item.selectedSize}</span>}
+                      </p>
                     </div>
                     <div className="flex flex-1 items-end justify-between text-sm">
                       <div className="flex items-center border border-slate-300 rounded-sm">
                         <button
-                          onClick={() => onUpdateQuantity(item.id, -1)}
+                          onClick={() => onUpdateQuantity(item.cartItemId, -1)}
                           className="px-2 py-1 hover:bg-slate-100 text-slate-600 disabled:opacity-50"
                           disabled={item.quantity <= 1}
                         >
@@ -76,7 +81,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, cart, onRemove
                         </button>
                         <span className="px-2 text-primary font-medium">{item.quantity}</span>
                         <button
-                          onClick={() => onUpdateQuantity(item.id, 1)}
+                          onClick={() => onUpdateQuantity(item.cartItemId, 1)}
                           className="px-2 py-1 hover:bg-slate-100 text-slate-600"
                         >
                           +
@@ -85,7 +90,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, cart, onRemove
 
                       <button
                         type="button"
-                        onClick={() => onRemove(item.id)}
+                        onClick={() => onRemove(item.cartItemId)}
                         className="font-medium text-rose-500 hover:text-rose-700 flex items-center space-x-1"
                       >
                         <Trash2 size={16} />

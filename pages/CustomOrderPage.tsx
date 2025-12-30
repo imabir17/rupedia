@@ -1,15 +1,13 @@
 import React from 'react';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
 import ProductCard from '../components/ProductCard';
 import { Palette, Mail } from 'lucide-react';
 
-interface CustomOrderPageProps {
-    onAddToCart: (product: Product) => void;
-}
+import { useStore } from '../context/StoreContext';
 
-const CustomOrderPage: React.FC<CustomOrderPageProps> = ({ onAddToCart }) => {
-    const customProducts = PRODUCTS.filter(p => p.isCustomOrder);
+const CustomOrderPage: React.FC = () => {
+    const { products } = useStore();
+    const customProducts = products.filter(p => p.isCustomOrder);
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
@@ -36,7 +34,7 @@ const CustomOrderPage: React.FC<CustomOrderPageProps> = ({ onAddToCart }) => {
                 {customProducts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {customProducts.map(product => (
-                            <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+                            <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                 ) : (
