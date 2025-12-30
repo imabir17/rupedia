@@ -14,7 +14,7 @@ interface StoreContextType {
     updateProduct: (product: Product) => void;
     deleteProduct: (id: string) => void;
     addCategory: (category: string) => void;
-    placeOrder: (orderData: Omit<Order, 'id' | 'date' | 'status'>) => void;
+    placeOrder: (orderData: Omit<Order, 'id' | 'date' | 'status'>) => string;
     updateOrderStatus: (id: string, status: Order['status']) => void;
     addToCart: (product: Product, color?: string, size?: string) => void;
     removeFromCart: (cartItemId: string) => void;
@@ -144,7 +144,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setProducts(prev => prev.filter(p => p.id !== id));
     };
 
-    const placeOrder = (orderData: Omit<Order, 'id' | 'date' | 'status'>) => {
+    const placeOrder = (orderData: Omit<Order, 'id' | 'date' | 'status'>): string => {
         const newOrder: Order = {
             ...orderData,
             id: `ORD-${Date.now().toString().slice(-6)}`,
@@ -153,6 +153,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
         setOrders(prev => [newOrder, ...prev]);
         clearCart(); // Clear cart after order
+        return newOrder.id;
     };
 
     const updateOrderStatus = (id: string, status: Order['status']) => {

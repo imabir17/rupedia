@@ -3,11 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingBag, ArrowLeft, Star, Share2, ShieldCheck, Truck } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { Product } from '../types';
+import { useToast } from '../context/ToastContext';
 
 const ProductDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { products, addToCart } = useStore();
+    const { showToast } = useToast();
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -80,10 +82,8 @@ const ProductDetailsPage: React.FC = () => {
         for (let i = 0; i < quantity; i++) {
             addToCart(product, selectedColor || undefined, selectedSize || undefined);
         }
-        // Feedback
-        // alert("Added to cart!"); 
-        // Better UX: don't alert, just maybe highlight cart or rely on store toast if exists. 
-        // For now, no alert is cleaner as cart updates are usually visible via badge.
+
+        showToast(`Added ${quantity} ${product.name} to cart`, 'success');
     };
 
     return (

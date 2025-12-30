@@ -3,10 +3,12 @@ import { CartItem, Order } from '../types';
 import { MapPin, CreditCard, Send, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
+import { useToast } from '../context/ToastContext';
 
 const CheckoutPage: React.FC = () => {
     const navigate = useNavigate();
     const { cart, placeOrder } = useStore();
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -30,12 +32,12 @@ const CheckoutPage: React.FC = () => {
         e.preventDefault();
 
         if (formData.paymentMethod !== 'COD' && !formData.trxId) {
-            alert('Please provide the Transaction ID for online payment.');
+            showToast('Please provide the Transaction ID for online payment.', 'error');
             return;
         }
 
         // Place order in Global Store
-        placeOrder({
+        const orderId = placeOrder({
             customerName: formData.name,
             customerPhone: formData.phone,
             customerAddress: formData.address,
@@ -48,10 +50,8 @@ const CheckoutPage: React.FC = () => {
             trxId: formData.trxId || undefined,
         });
 
-        alert(`Order Placed Successfully! \nTotal: ${total} BDT`);
-        navigate('/'); // Redirect to Home
-        // Ideally we should clear the cart here too, but for now we focus on Admin integration
-        window.location.reload(); // Simple hack to clear cart/state for demo
+        showToast(`Order Placed Successfully! Total: ${total} BDT`, 'success');
+        navigate(`/order-confirmation/${orderId}`);
     };
 
     if (cart.length === 0) {
