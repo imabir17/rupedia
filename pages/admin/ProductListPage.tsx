@@ -1,10 +1,11 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Edit2, Trash2, Plus } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 const ProductListPage: React.FC = () => {
     const { products, deleteProduct } = useStore();
+    const navigate = useNavigate();
 
     const handleDelete = (id: string) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
@@ -54,7 +55,7 @@ const ProductListPage: React.FC = () => {
                                     <button
                                         className="text-slate-400 hover:text-blue-600 transition-colors"
                                         title="Edit"
-                                        onClick={() => alert('Edit feature to be implemented in fully detailed form page')}
+                                        onClick={() => navigate(`/admin/products/${product.id}`)}
                                     >
                                         <Edit2 size={18} />
                                     </button>
