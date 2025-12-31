@@ -66,8 +66,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                       </div>
                       <p className="mt-1 text-sm text-slate-500">
                         {item.category}
-                        {item.selectedColor && <span className="ml-2 text-xs border border-slate-200 px-1 rounded">Color: {item.selectedColor}</span>}
-                        {item.selectedSize && <span className="ml-2 text-xs border border-slate-200 px-1 rounded">Size: {item.selectedSize}</span>}
+                        {item.selectedOptions ? (
+                          Object.entries(item.selectedOptions).map(([key, value]) => (
+                            <span key={key} className="ml-2 text-xs border border-slate-200 px-1 rounded capitalize">{key}: {value}</span>
+                          ))
+                        ) : (
+                          <>
+                            {item.selectedColor && <span className="ml-2 text-xs border border-slate-200 px-1 rounded">Color: {item.selectedColor}</span>}
+                            {item.selectedSize && <span className="ml-2 text-xs border border-slate-200 px-1 rounded">Size: {item.selectedSize}</span>}
+                          </>
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-1 items-end justify-between text-sm">

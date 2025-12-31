@@ -13,7 +13,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="group relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 border border-slate-100">
       <Link to={`/product/${product.id}`} className="block relative cursor-pointer aspect-[4/5] overflow-hidden bg-slate-100">
         <img
-          src={product.image}
+          src={product.images?.[0] || 'https://via.placeholder.com/400x500'}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
           loading="lazy"
@@ -32,17 +32,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
         {product.originalPrice && product.originalPrice > product.price && (
-          <div className="absolute top-2 left-2 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-sm shadow-sm pointer-events-none z-20">
+          <div className="absolute top-2 right-2 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-sm shadow-sm pointer-events-none z-20">
             -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
           </div>
         )}
         {product.isPreOrder && (
-          <div className="absolute top-2 right-2 bg-purple-600/90 text-white text-xs font-bold px-2 py-1 uppercase tracking-wider pointer-events-none">
+          <div className="absolute top-10 right-2 bg-purple-600/90 text-white text-xs font-bold px-2 py-1 uppercase tracking-wider pointer-events-none">
             Pre-order
           </div>
         )}
         {product.isCustomOrder && (
-          <div className="absolute top-2 right-2 bg-teal-600/90 text-white text-xs font-bold px-2 py-1 uppercase tracking-wider pointer-events-none">
+          <div className="absolute top-10 right-2 bg-teal-600/90 text-white text-xs font-bold px-2 py-1 uppercase tracking-wider pointer-events-none">
             Custom Order
           </div>
         )}

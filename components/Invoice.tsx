@@ -63,8 +63,16 @@ const Invoice: React.FC<InvoiceProps> = ({ order, className = '' }) => {
                                 <td className="py-4">
                                     <p className="font-medium text-slate-800">{item.name}</p>
                                     <p className="text-xs text-slate-500">
-                                        {item.selectedColor && `Color: ${item.selectedColor} `}
-                                        {item.selectedSize && `Size: ${item.selectedSize}`}
+                                        {item.selectedOptions ? (
+                                            Object.entries(item.selectedOptions).map(([key, value]) => (
+                                                <span key={key} className="mr-2 capitalize">{key}: {value}</span>
+                                            ))
+                                        ) : (
+                                            <>
+                                                {item.selectedColor && `Color: ${item.selectedColor} `}
+                                                {item.selectedSize && `Size: ${item.selectedSize}`}
+                                            </>
+                                        )}
                                     </p>
                                 </td>
                                 <td className="py-4 text-center text-slate-600">{item.quantity}</td>
@@ -97,7 +105,7 @@ const Invoice: React.FC<InvoiceProps> = ({ order, className = '' }) => {
             {/* Footer */}
             <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 text-center">
                 <p className="text-xs text-slate-500">
-                    Questions? Contact us at support@rupedia.com or +880123456789.
+                    Questions? Contact us at rupediaa@gmail.com or 01308811838.
                 </p>
             </div>
         </div>

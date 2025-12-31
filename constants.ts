@@ -1,8 +1,34 @@
 import { Product } from './types';
 
+// Helper to migrate old data structure to new
+const createProduct = (data: any): Product => ({
+  id: data.id,
+  name: data.name,
+  sku: `SKU-${data.id.toUpperCase()}`,
+  type: data.isCustomOrder ? 'custom' : data.isPreOrder ? 'pre-order' : 'regular',
+  status: 'published',
+  category: data.category,
+  description: data.description,
+  shortDescription: data.description.substring(0, 100) + '...',
+  price: data.price,
+  originalPrice: data.originalPrice,
+  images: [data.image],
+  isFeatured: data.isFeatured || false,
+  rating: data.rating,
+  reviews: data.reviews,
+  stock: 100,
+  trackQuantity: true,
+  variants: [],
+  options: [
+    ...(data.colors ? [{ name: 'Color', values: data.colors }] : []),
+    ...(data.sizes ? [{ name: 'Size', values: data.sizes }] : [])
+  ],
+  preOrderEnd: data.preOrderEndDate,
+});
+
 export const PRODUCTS: Product[] = [
   // Home Decor
-  {
+  createProduct({
     id: 'hd-1',
     name: 'Minimalist Ceramic Vase',
     description: 'Hand-crafted ceramic vase with a matte finish. Perfect for dried flowers.',
@@ -17,8 +43,8 @@ export const PRODUCTS: Product[] = [
       { id: 'r2', userName: 'Mike R.', rating: 4, comment: 'Great quality, but slightly smaller than expected.', date: '2024-03-10' }
     ],
     rating: 4.5
-  },
-  {
+  }),
+  createProduct({
     id: 'hd-2',
     name: 'Boho Macrame Wall Hanging',
     description: 'Intricate cotton macrame piece to add texture to your living space.',
@@ -27,8 +53,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=2',
     isFeatured: false,
     rating: 4.8
-  },
-  {
+  }),
+  createProduct({
     id: 'hd-3',
     name: 'Scented Soy Candle - Lavender',
     description: 'Eco-friendly soy wax candle with a calming lavender scent.',
@@ -38,8 +64,8 @@ export const PRODUCTS: Product[] = [
     isFeatured: true,
     sizes: ['Small (4oz)', 'Large (8oz)'],
     rating: 5.0
-  },
-  {
+  }),
+  createProduct({
     id: 'hd-4',
     name: 'Velvet Throw Pillow',
     description: 'Luxuriously soft velvet pillow cover in dusty rose.',
@@ -50,10 +76,10 @@ export const PRODUCTS: Product[] = [
     isFeatured: false,
     colors: ['#FECDD3', '#1F2937', '#D1FAE5'],
     rating: 4.2
-  },
+  }),
 
   // Stationery
-  {
+  createProduct({
     id: 'st-1',
     name: 'Marble Hardcover Journal',
     description: 'Premium 120gsm paper journal with a gold-foiled marble cover.',
@@ -62,8 +88,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=5',
     isFeatured: false,
     rating: 4.7
-  },
-  {
+  }),
+  createProduct({
     id: 'st-2',
     name: 'Pastel Gel Pen Set',
     description: 'Set of 6 smooth-writing gel pens in aesthetic pastel shades.',
@@ -73,8 +99,8 @@ export const PRODUCTS: Product[] = [
     isFeatured: true,
     colors: ['#F9A8D4', '#93C5FD', '#C4B5FD'],
     rating: 4.6
-  },
-  {
+  }),
+  createProduct({
     id: 'st-3',
     name: 'Weekly Desk Planner',
     description: 'Undated weekly planner pad to keep your tasks organized.',
@@ -83,10 +109,10 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=7',
     isFeatured: false,
     rating: 4.3
-  },
+  }),
 
   // Ornaments
-  {
+  createProduct({
     id: 'or-1',
     name: 'Gold Plated Layered Necklace',
     description: 'Delicate double-layered necklace with a celestial pendant.',
@@ -99,8 +125,8 @@ export const PRODUCTS: Product[] = [
     reviews: [
       { id: 'r3', userName: 'Emily T.', rating: 5, comment: 'Stunning piece! I wear it every day.', date: '2024-02-28' }
     ]
-  },
-  {
+  }),
+  createProduct({
     id: 'or-2',
     name: 'Pearl Drop Earrings',
     description: 'Classic freshwater pearl earrings with sterling silver hooks.',
@@ -109,8 +135,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=9',
     isFeatured: false,
     rating: 4.8
-  },
-  {
+  }),
+  createProduct({
     id: 'or-3',
     name: 'Rose Quartz Bracelet',
     description: 'Beaded bracelet made with genuine rose quartz stones.',
@@ -119,10 +145,10 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=10',
     isFeatured: false,
     rating: 4.5
-  },
+  }),
 
   // Makeup
-  {
+  createProduct({
     id: 'mk-1',
     name: 'Matte Liquid Lipstick',
     description: 'Long-lasting matte lipstick in a deep berry shade.',
@@ -132,8 +158,8 @@ export const PRODUCTS: Product[] = [
     isFeatured: false,
     colors: ['#9F1239', '#BE123C', '#E11D48'],
     rating: 4.4
-  },
-  {
+  }),
+  createProduct({
     id: 'mk-2',
     name: 'Highlighter Palette',
     description: 'Triple-shade palette for a radiant, natural glow.',
@@ -143,8 +169,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=12',
     isFeatured: true,
     rating: 4.8
-  },
-  {
+  }),
+  createProduct({
     id: 'mk-3',
     name: 'Vegan Makeup Brush Set',
     description: '7-piece professional brush set with bamboo handles.',
@@ -153,8 +179,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/400/500?random=13',
     isFeatured: false,
     rating: 4.9
-  },
-  {
+  }),
+  createProduct({
     id: 'po-1',
     name: 'Exclusive Pre-order: Artisan Lamp',
     description: 'Handcrafted artisan lamp, available for pre-order only.',
@@ -164,8 +190,8 @@ export const PRODUCTS: Product[] = [
     isFeatured: true,
     isPreOrder: true,
     rating: 5.0
-  },
-  {
+  }),
+  createProduct({
     id: 'po-2',
     name: 'Limited Edition Notebook Set',
     description: 'A set of 5 premium leather-bound notebooks. Pre-order exclusive.',
@@ -175,8 +201,8 @@ export const PRODUCTS: Product[] = [
     isFeatured: false,
     isPreOrder: true,
     rating: 4.9
-  },
-  {
+  }),
+  createProduct({
     id: 'co-1',
     name: 'Custom Art Canvas - Abstract',
     description: 'Personalized abstract art canvas. Contact us to specify your color palette and dimensions.',
@@ -186,8 +212,8 @@ export const PRODUCTS: Product[] = [
     isFeatured: false,
     isCustomOrder: true,
     rating: 5.0
-  },
-  {
+  }),
+  createProduct({
     id: 'co-2',
     name: 'Custom Engraved Nameplate',
     description: 'Brass nameplate with custom engraving for your home entrance.',
@@ -197,5 +223,5 @@ export const PRODUCTS: Product[] = [
     isFeatured: false,
     isCustomOrder: true,
     rating: 4.8
-  }
+  })
 ];

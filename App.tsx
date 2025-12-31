@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import CartDrawer from './components/CartDrawer';
-import ChatBubble from './components/ChatBubble';
+import PublicLayout from './layouts/PublicLayout';
 
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
@@ -23,6 +20,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import ProductListPage from './pages/admin/ProductListPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
 import OrderListPage from './pages/admin/OrderListPage';
+import OrderDetailsPage from './pages/admin/OrderDetailsPage';
 
 import { PRODUCTS } from './constants';
 import { Product, CartItem } from './types';
@@ -41,50 +39,37 @@ const ScrollToTop = () => {
 };
 
 const App: React.FC = () => {
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
   return (
     <Router>
       <StoreProvider>
         <ToastProvider>
           <ScrollToTop />
-          <div className="flex flex-col min-h-screen bg-slate-50">
-            <Navbar onOpenCart={() => setIsCartOpen(true)} />
+          <Routes>
+            {/* Public Routes - Wrapped in PublicLayout */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/product/:id" element={<ProductDetailsPage />} />
+              <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+              <Route path="/returns-exchanges" element={<ReturnsExchangesPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/pre-order" element={<PreOrderPage />} />
+              <Route path="/custom-order" element={<CustomOrderPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
+            </Route>
 
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/product/:id" element={<ProductDetailsPage />} />
-                <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
-                <Route path="/returns-exchanges" element={<ReturnsExchangesPage />} />
-                <Route path="/faq" element={<FAQPage />} />
-                <Route path="/pre-order" element={<PreOrderPage />} />
-                <Route path="/custom-order" element={<CustomOrderPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
-
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<DashboardPage />} />
-                  <Route path="products" element={<ProductListPage />} />
-                  <Route path="products/new" element={<ProductFormPage />} />
-                  <Route path="products/:id" element={<ProductFormPage />} />
-                  <Route path="orders" element={<OrderListPage />} />
-                </Route>
-              </Routes>
-            </main>
-
-            <Footer />
-
-            <CartDrawer
-              isOpen={isCartOpen}
-              onClose={() => setIsCartOpen(false)}
-            />
-
-            <ChatBubble />
-          </div>
+            {/* Admin Routes - Wrapped in AdminLayout */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="products" element={<ProductListPage />} />
+              <Route path="products/new" element={<ProductFormPage />} />
+              <Route path="products/:id" element={<ProductFormPage />} />
+              <Route path="orders" element={<OrderListPage />} />
+              <Route path="orders/:id" element={<OrderDetailsPage />} />
+            </Route>
+          </Routes>
         </ToastProvider>
       </StoreProvider>
     </Router>

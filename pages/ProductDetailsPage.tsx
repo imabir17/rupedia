@@ -8,13 +8,16 @@ import { useToast } from '../context/ToastContext';
 const ProductDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { products, addToCart } = useStore();
+    const { products, addToCart, addReview } = useStore();
     const { showToast } = useToast();
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
-    const [selectedColor, setSelectedColor] = useState<string | null>(null);
-    const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
+    // Dynamic Options State
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+
     const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
+    const [newReviewRating, setNewReviewRating] = useState(0);
 
     const product = useMemo(() => products.find(p => p.id === id), [id, products]);
 
@@ -25,6 +28,21 @@ const ProductDetailsPage: React.FC = () => {
             .slice(0, 4);
     }, [product, products]);
 
+    // Initialize default options if single value exists
+    useEffect(() => {
+        if (product?.options) {
+            const defaults: Record<string, string> = {};
+            product.options.forEach(opt => {
+                if (opt.values.length === 1) {
+                    defaults[opt.name] = opt.values[0];
+                }
+            });
+            if (Object.keys(defaults).length > 0) {
+                setSelectedOptions(prev => ({ ...prev, ...defaults }));
+            }
+        }
+    }, [product]);
+
     if (!product) {
         return (
             <div className="min-h-screen pt-20 flex flex-col items-center justify-center bg-slate-50">
@@ -34,22 +52,23 @@ const ProductDetailsPage: React.FC = () => {
         );
     }
 
-    // Mock multiple images for the gallery
-    const images = [
-        product.image,
-        `https://picsum.photos/400/500?random=${product.id}-2`,
-        `https://picsum.photos/400/500?random=${product.id}-3`,
-    ];
+    // Use product images or fallback
+    const images = product.images && product.images.length > 0
+        ? product.images
+        : [`https://picsum.photos/400/500?random=${product.id}`];
 
-    // Countdown Logic
+    // Countdown Logic (kept same)
     const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
     const [isExpired, setIsExpired] = useState(false);
 
     useEffect(() => {
-        if (!product?.isPreOrder || !product?.preOrderEndDate) return;
+        if (!product?.preOrderEnd) return;
 
         const calculateTimeLeft = () => {
-            const difference = +new Date(product.preOrderEndDate!) - +new Date();
+            const endDate = product.preOrderEnd;
+            if (!endDate) return;
+
+            const difference = +new Date(endDate) - +new Date();
 
             if (difference > 0) {
                 setTimeLeft({
@@ -71,16 +90,26 @@ const ProductDetailsPage: React.FC = () => {
         return () => clearInterval(timer);
     }, [product]);
 
+    const handleOptionSelect = (optionName: string, value: string) => {
+        setSelectedOptions(prev => ({
+            ...prev,
+            [optionName]: value
+        }));
+    };
 
     const handleAddToCart = () => {
-        // Double check validation just in case
-        if ((product.colors?.length > 0 && !selectedColor) || (product.sizes?.length > 0 && !selectedSize)) {
-            return;
+        // Validation: Check if all options are selected
+        if (product.options && product.options.length > 0) {
+            const missingOptions = product.options.filter(opt => !selectedOptions[opt.name]);
+            if (missingOptions.length > 0) {
+                showToast(`Please select ${missingOptions.map(o => o.name).join(', ')}`, 'error');
+                return;
+            }
         }
 
         // Add multiple times based on quantity
         for (let i = 0; i < quantity; i++) {
-            addToCart(product, selectedColor || undefined, selectedSize || undefined);
+            addToCart(product, selectedOptions);
         }
 
         showToast(`Added ${quantity} ${product.name} to cart`, 'success');
@@ -201,95 +230,56 @@ const ProductDetailsPage: React.FC = () => {
                         )}
 
 
-                        {/* Variants */}
-                        <div className="space-y-6 mb-8">
-                            {product.colors && (
-                                <div>
-                                    <h3 className="font-medium text-slate-900 mb-2 text-sm">Color</h3>
-                                    <div className="flex space-x-2">
-                                        {product.colors.map(color => (
-                                            <button
-                                                key={color}
-                                                onClick={() => setSelectedColor(color)}
-                                                disabled={isExpired} // Disable selection if expired
-                                                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${isExpired ? 'opacity-50 cursor-not-allowed border-slate-200' : selectedColor === color ? 'border-primary ring-1 ring-primary' : 'border-transparent hover:scale-110'}`}
-                                                style={{ backgroundColor: color }}
-                                                aria-label={`Select color ${color}`}
-                                            >
-                                                {selectedColor === color && <span className="block w-2 h-2 bg-white rounded-full shadow-sm" />}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                        {/* Dynamic Variants Selection */}
+                        {product.options && product.options.length > 0 && (
+                            <div className="space-y-6 mb-8">
+                                {product.options.map((option, idx) => (
+                                    <div key={idx}>
+                                        <h3 className="font-medium text-slate-900 mb-2 text-sm">{option.name}</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {option.values.map(value => {
+                                                const isSelected = selectedOptions[option.name] === value;
+                                                const isColor = option.name.toLowerCase() === 'color' || option.name.toLowerCase() === 'colour';
 
-                            {product.sizes && (
-                                <div>
-                                    <h3 className="font-medium text-slate-900 mb-2 text-sm">Size</h3>
-                                    <div className="flex space-x-2">
-                                        {product.sizes.map(size => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                disabled={isExpired} // Disable selection if expired
-                                                className={`px-4 py-2 border rounded-md text-sm transition-all ${isExpired ? 'opacity-50 cursor-not-allowed border-slate-200 text-slate-400' : selectedSize === size ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                                if (isColor) {
+                                                    return (
+                                                        <button
+                                                            key={value}
+                                                            onClick={() => handleOptionSelect(option.name, value)}
+                                                            disabled={isExpired}
+                                                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all 
+                                                                ${isExpired ? 'opacity-50 cursor-not-allowed border-slate-200' : isSelected ? 'border-primary ring-1 ring-primary' : 'border-transparent hover:scale-110 shadow-sm'}`}
+                                                            style={{ backgroundColor: value.toLowerCase() }}
+                                                            title={value}
+                                                        >
+                                                            {isSelected && <span className="block w-2 h-2 bg-white rounded-full shadow-sm invert mix-blend-difference" />}
+                                                        </button>
+                                                    );
+                                                }
 
-                        {/* Tabs */}
-                        <div className="border-b border-pink-100 mb-6">
-                            <div className="flex space-x-8">
-                                <button
-                                    onClick={() => setActiveTab('description')}
-                                    className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'description' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    Description
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('reviews')}
-                                    className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'reviews' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    Reviews
-                                </button>
-                            </div>
-                        </div>
-
-                        {activeTab === 'description' ? (
-                            <div className="prose prose-slate mb-8 animate-fade-in">
-                                <p>{product.description}</p>
-                                <p className="text-sm mt-4 text-slate-500">
-                                    Hand-picked and curated for the finest quality. Each piece tells a unique story and brings elegance to your lifestyle.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="mb-8 space-y-6 animate-fade-in">
-                                {product.reviews && product.reviews.length > 0 ? (
-                                    product.reviews.map(review => (
-                                        <div key={review.id} className="border-b border-slate-50 pb-4 last:border-0">
-                                            <div className="flex items-center space-x-2 mb-1">
-                                                <span className="font-semibold text-slate-800">{review.userName}</span>
-                                                <div className="flex text-yellow-500">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-slate-200" : ""} />
-                                                    ))}
-                                                </div>
-                                                <span className="text-xs text-slate-400">{review.date}</span>
-                                            </div>
-                                            <p className="text-sm text-slate-600">{review.comment}</p>
+                                                return (
+                                                    <button
+                                                        key={value}
+                                                        onClick={() => handleOptionSelect(option.name, value)}
+                                                        disabled={isExpired}
+                                                        className={`px-4 py-2 border rounded-md text-sm transition-all 
+                                                            ${isExpired ? 'opacity-50 cursor-not-allowed border-slate-200 text-slate-400' :
+                                                                isSelected ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'}`}
+                                                    >
+                                                        {value}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg">
-                                        <p>No reviews yet.</p>
-                                        <button className="mt-2 text-accent text-sm hover:underline">Be the first to write a review</button>
                                     </div>
-                                )}
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Legacy Variants Fallback (Colors/Sizes if valid ops missing) */}
+                        {(!product.options || product.options.length === 0) && (product.colors || product.sizes) && (
+                            <div className="p-4 bg-yellow-50 text-yellow-800 text-sm rounded mb-4">
+                                Legacy variant data detected. Please update product.
                             </div>
                         )}
 
@@ -313,28 +303,17 @@ const ProductDetailsPage: React.FC = () => {
                                         <Plus size={18} />
                                     </button>
                                 </div>
-                                {(() => {
-                                    const isColorSelected = !product.colors || product.colors.length === 0 || selectedColor;
-                                    const isSizeSelected = !product.sizes || product.sizes.length === 0 || selectedSize;
-                                    const isAvailable = !isExpired;
-                                    const canAddToCart = isColorSelected && isSizeSelected && isAvailable;
-
-                                    return (
-                                        <button
-                                            onClick={handleAddToCart}
-                                            disabled={!canAddToCart}
-                                            className={`flex-1 ${!canAddToCart
-                                                ? 'bg-slate-300 cursor-not-allowed'
-                                                : product.isPreOrder
-                                                    ? 'bg-purple-600 hover:bg-purple-700 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
-                                                    : 'bg-primary hover:bg-blue-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
-                                                } text-white px-8 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2`}
-                                        >
-                                            <ShoppingBag size={20} />
-                                            {isExpired ? 'Pre-order Ended' : !isColorSelected ? 'Select Color' : !isSizeSelected ? 'Select Size' : product.isPreOrder ? 'Pre-order Now' : 'Add to Cart'}
-                                        </button>
-                                    );
-                                })()}
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={isExpired || (product.stock === 0 && product.trackQuantity)}
+                                    className={`flex-1 ${isExpired || (product.stock === 0 && product.trackQuantity)
+                                        ? 'bg-slate-300 cursor-not-allowed'
+                                        : 'bg-primary hover:bg-blue-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
+                                        } text-white px-8 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2`}
+                                >
+                                    <ShoppingBag size={20} />
+                                    {isExpired ? 'Pre-order Ended' : (product.stock === 0 && product.trackQuantity) ? 'Out of Stock' : product.type === 'pre-order' ? 'Pre-order Now' : 'Add to Cart'}
+                                </button>
                             </div>
 
                             {/* Pre-order Warning */}
@@ -348,20 +327,19 @@ const ProductDetailsPage: React.FC = () => {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 text-sm text-slate-500">
-                            <div className="flex items-center gap-2">
-                                <Truck size={18} className="text-accent" />
-                                <span>Free shipping over ৳2000</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <ShieldCheck size={18} className="text-accent" />
-                                <span>30-day return policy</span>
-                            </div>
-                        </div>
 
-                        <button className="flex items-center gap-2 text-slate-400 hover:text-primary mt-8 w-max transition-colors text-sm">
-                            <Share2 size={16} /> Share this product
-                        </button>
+
+                        <div className="flex flex-col gap-4 mt-8">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(window.location.href);
+                                    showToast('Link copied to clipboard!', 'success');
+                                }}
+                                className="flex items-center gap-2 text-slate-400 hover:text-primary w-max transition-colors text-sm"
+                            >
+                                <Share2 size={16} /> Share this product
+                            </button>
+                        </div>
 
                     </div>
                 </div>
