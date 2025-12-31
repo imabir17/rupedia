@@ -21,6 +21,9 @@ import ProductListPage from './pages/admin/ProductListPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
 import OrderListPage from './pages/admin/OrderListPage';
 import OrderDetailsPage from './pages/admin/OrderDetailsPage';
+import AdminCancellationPage from './pages/admin/AdminCancellationPage';
+import OrderStatusPage from './pages/OrderStatusPage';
+import CancellationRequestPage from './pages/CancellationRequestPage';
 
 import { PRODUCTS } from './constants';
 import { Product, CartItem } from './types';
@@ -58,6 +61,8 @@ const App: React.FC = () => {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
+              <Route path="/order-status" element={<OrderStatusPage />} />
+              <Route path="/cancel-order" element={<CancellationRequestPage />} />
             </Route>
 
             {/* Admin Routes - Wrapped in AdminLayout */}
@@ -68,6 +73,7 @@ const App: React.FC = () => {
               <Route path="products/:id" element={<ProductFormPage />} />
               <Route path="orders" element={<OrderListPage />} />
               <Route path="orders/:id" element={<OrderDetailsPage />} />
+              <Route path="cancellations" element={<AdminCancellationPage />} />
             </Route>
           </Routes>
         </ToastProvider>

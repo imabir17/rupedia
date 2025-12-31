@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, Order, User, CartItem, OrderStatus, FulfillmentStatus } from '../types';
+import { Product, Order, User, CartItem, OrderStatus, FulfillmentStatus, CancellationRequest } from '../types';
 import { PRODUCTS } from '../constants';
 
 interface StoreContextType {
@@ -21,6 +21,9 @@ interface StoreContextType {
     updateQuantity: (cartItemId: string, delta: number) => void;
     clearCart: () => void;
     addReview: (productId: string, review: any) => void;
+    cancellationRequests: CancellationRequest[];
+    addCancellationRequest: (req: Omit<CancellationRequest, 'id' | 'status' | 'date'>) => void;
+    updateCancellationStatus: (requestId: string, status: 'approved' | 'rejected', adminNote?: string) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -170,12 +173,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const placeOrder = (orderData: Partial<Order>): string => {
-        const orderId = `ORD-${Date.now().toString().slice(-6)}`;
-        const orderNumber = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+        // Fix: Use one unified Order ID/Number to prevent mismatches
+        const uniqueId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+        // Cleaning the ID for display if preferred, or just use the same unique string
+        const displayId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`; // Simple 6-digit random
+
+        const orderId = displayId;
+        const orderNumber = displayId;
 
         const newOrder: Order = {
             id: orderId,
-            orderNumber,
+            orderNumber, // Now identical to id
             date: new Date().toISOString(),
             status: 'Pending',
             paymentStatus: 'pending',
@@ -246,6 +254,45 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     };
 
+    // Cancellation Requests State
+    // FIXED: Use lazy initialization to prevent overwriting localStorage on mount
+    const [cancellationRequests, setCancellationRequests] = useState<CancellationRequest[]>(() => {
+        const saved = localStorage.getItem('rupedia_cancellations');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    // Removed the useEffect that loads on mount, as lazy init handles it.
+    // Only keeping the saver effect.
+    useEffect(() => {
+        localStorage.setItem('rupedia_cancellations', JSON.stringify(cancellationRequests));
+    }, [cancellationRequests]);
+
+    const addCancellationRequest = (req: Omit<CancellationRequest, 'id' | 'status' | 'date'>) => {
+        const newReq: CancellationRequest = {
+            ...req,
+            id: Date.now().toString(),
+            status: 'pending',
+            date: new Date().toISOString()
+        };
+        setCancellationRequests(prev => [newReq, ...prev]);
+    };
+
+    const updateCancellationStatus = (requestId: string, status: 'approved' | 'rejected', adminNote?: string) => {
+        setCancellationRequests(prev => prev.map(req => {
+            if (req.id === requestId) {
+                return { ...req, status, adminNote };
+            }
+            return req;
+        }));
+
+        if (status === 'approved') {
+            const request = cancellationRequests.find(r => r.id === requestId);
+            if (request) {
+                updateOrderStatus(request.orderId, 'Cancelled');
+            }
+        }
+    };
+
     return (
         <StoreContext.Provider value={{
             products,
@@ -265,7 +312,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             removeFromCart,
             updateQuantity,
             clearCart,
-            addReview
+            addReview,
+            cancellationRequests,
+            addCancellationRequest,
+            updateCancellationStatus
         }}>
             {children}
         </StoreContext.Provider>

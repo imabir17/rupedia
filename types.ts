@@ -117,6 +117,19 @@ export interface OrderLog {
   userId?: string; // Author of the action
 }
 
+export interface CancellationRequest {
+  id: string;
+  orderId: string;
+  customerName: string;
+  phone: string;
+  reason: string;
+  transactionId?: string;
+  address?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNote?: string;
+  date: string;
+}
+
 export interface OrderAddress {
   address: string;
   city: string;
@@ -173,4 +186,17 @@ export interface Order {
 export interface User {
   username: string;
   role: 'admin' | 'user';
+}
+
+export interface CancellationRequest {
+  id: string;
+  orderId: string;
+  customerName: string;
+  phone: string;
+  reason: string;
+  transactionId?: string;
+  address?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNote?: string;
+  date: string;
 }

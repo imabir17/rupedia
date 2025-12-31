@@ -74,6 +74,12 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
               >
                 Custom
               </Link>
+              <Link
+                to="/order-status"
+                className={`text-slate-600 hover:text-orange-600 transition-all font-medium py-1 border-b-2 ${isActive('/order-status') ? 'border-orange-600 text-orange-600' : 'border-transparent'}`}
+              >
+                Track Order
+              </Link>
             </div>
           </div>
 
@@ -155,6 +161,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
             <Link to="/shop" onClick={toggleMenu} className="block px-3 py-2 text-lg font-medium text-slate-700 hover:bg-pink-50 hover:text-primary rounded-md transition-colors">Shop Collection</Link>
             <Link to="/pre-order" onClick={toggleMenu} className="block px-3 py-2 text-lg font-medium text-slate-700 hover:bg-purple-50 hover:text-purple-600 rounded-md transition-colors">Pre-order</Link>
             <Link to="/custom-order" onClick={toggleMenu} className="block px-3 py-2 text-lg font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-600 rounded-md transition-colors">Custom Order</Link>
+            <Link to="/order-status" onClick={toggleMenu} className="block px-3 py-2 text-lg font-medium text-slate-700 hover:bg-orange-50 hover:text-orange-600 rounded-md transition-colors">Track Order</Link>
             <div className="border-t border-pink-100 my-3"></div>
             <div className="grid grid-cols-2 gap-2">
               {/* Note: In a real app we might want to fetch categories from store, but for mobile menu logic, we need to access store */}

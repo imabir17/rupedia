@@ -20,6 +20,7 @@ const Footer: React.FC = () => {
             <li><Link to="/returns-exchanges" className="hover:text-white transition">Returns & Exchanges</Link></li>
             <li><Link to="/faq" className="hover:text-white transition">FAQ</Link></li>
             <li><Link to="/contact" className="hover:text-white transition">Contact Us</Link></li>
+            <li><Link to="/order-status" className="hover:text-white transition">Track My Order</Link></li>
             <li className="pt-2 text-slate-400">
               <span className="block">Phone: 01308811838</span>
               <span className="block">Email: rupediaa@gmail.com</span>

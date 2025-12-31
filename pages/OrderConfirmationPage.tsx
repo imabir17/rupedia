@@ -38,7 +38,7 @@ const OrderConfirmationPage: React.FC = () => {
                         <CheckCircle size={32} className="text-green-600" />
                     </div>
                     <h1 className="text-3xl font-serif text-slate-900 mb-2">Order Confirmed!</h1>
-                    <p className="text-slate-600">Thank you for your purchase. Your order ID is <span className="font-mono font-medium text-slate-800">{order.id}</span>.</p>
+                    <p className="text-slate-600">Thank you for your purchase. Your order ID is <span className="font-mono font-medium text-slate-800">{order.orderNumber || order.id}</span>.</p>
                 </div>
 
                 {/* Actions */}

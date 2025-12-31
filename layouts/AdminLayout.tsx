@@ -44,6 +44,13 @@ const AdminLayout: React.FC = () => {
                         <ShoppingCart size={20} />
                         <span>Orders</span>
                     </NavLink>
+                    <NavLink
+                        to="/admin/cancellations"
+                        className={({ isActive }) => `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+                    >
+                        <LogOut size={20} className="rotate-180" /> {/* Reusing LogOut icon rotated for 'Return/Cancel' vibe, or use XCircle if imported */}
+                        <span>Cancellations</span>
+                    </NavLink>
                 </nav>
 
                 <div className="p-4 border-t border-slate-800">

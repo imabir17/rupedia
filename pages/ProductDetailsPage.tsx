@@ -285,37 +285,6 @@ const ProductDetailsPage: React.FC = () => {
 
                         <div className="border-t border-b border-pink-100 py-6 mb-8 space-y-6">
                             {/* Quantity & Add to Cart */}
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex items-center border border-pink-200 rounded-lg bg-white w-max">
-                                    <button
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        disabled={isExpired}
-                                        className={`p-3 transition-colors ${isExpired ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-primary'}`}
-                                    >
-                                        <Minus size={18} />
-                                    </button>
-                                    <span className={`w-12 text-center font-medium ${isExpired ? 'text-slate-400' : ''}`}>{quantity}</span>
-                                    <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        disabled={isExpired}
-                                        className={`p-3 transition-colors ${isExpired ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-primary'}`}
-                                    >
-                                        <Plus size={18} />
-                                    </button>
-                                </div>
-                                <button
-                                    onClick={handleAddToCart}
-                                    disabled={isExpired || (product.stock === 0 && product.trackQuantity)}
-                                    className={`flex-1 ${isExpired || (product.stock === 0 && product.trackQuantity)
-                                        ? 'bg-slate-300 cursor-not-allowed'
-                                        : 'bg-primary hover:bg-blue-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
-                                        } text-white px-8 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2`}
-                                >
-                                    <ShoppingBag size={20} />
-                                    {isExpired ? 'Pre-order Ended' : (product.stock === 0 && product.trackQuantity) ? 'Out of Stock' : product.type === 'pre-order' ? 'Pre-order Now' : 'Add to Cart'}
-                                </button>
-                            </div>
-
                             {/* Pre-order Warning */}
                             {product.isPreOrder && (
                                 <div className="bg-purple-50 border border-purple-200 p-4 rounded-md">
@@ -325,6 +294,55 @@ const ProductDetailsPage: React.FC = () => {
                                     </p>
                                 </div>
                             )}
+
+
+                            {/* Add to Cart Logic */}
+                            {(() => {
+                                const areOptionsSelected = !product.options || product.options.length === 0 || product.options.every(opt => selectedOptions[opt.name]);
+                                const isStockAvailable = !product.trackQuantity || (product.stock && product.stock > 0);
+                                const canAddToCart = !isExpired && areOptionsSelected && isStockAvailable;
+
+                                return (
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <div className="flex items-center border border-pink-200 rounded-lg bg-white w-max">
+                                            <button
+                                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                                disabled={isExpired}
+                                                className={`p-3 transition-colors ${isExpired ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-primary'}`}
+                                            >
+                                                <Minus size={18} />
+                                            </button>
+                                            <span className={`w-12 text-center font-medium ${isExpired ? 'text-slate-400' : ''}`}>{quantity}</span>
+                                            <button
+                                                onClick={() => setQuantity(quantity + 1)}
+                                                disabled={isExpired}
+                                                className={`p-3 transition-colors ${isExpired ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-primary'}`}
+                                            >
+                                                <Plus size={18} />
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={handleAddToCart}
+                                            disabled={!canAddToCart}
+                                            className={`flex-1 ${!canAddToCart
+                                                ? 'bg-slate-300 cursor-not-allowed'
+                                                : 'bg-primary hover:bg-blue-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
+                                                } text-white px-8 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2`}
+                                        >
+                                            <ShoppingBag size={20} />
+                                            {isExpired
+                                                ? 'Pre-order Ended'
+                                                : !isStockAvailable
+                                                    ? 'Out of Stock'
+                                                    : !areOptionsSelected
+                                                        ? 'Select Options'
+                                                        : product.type === 'pre-order'
+                                                            ? 'Pre-order Now'
+                                                            : 'Add to Cart'}
+                                        </button>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
 
